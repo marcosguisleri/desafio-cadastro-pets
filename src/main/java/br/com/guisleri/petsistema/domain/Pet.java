@@ -40,30 +40,6 @@ public class Pet {
                              double pesoKg,
                              String raca) {
 
-        if (nomeCompleto == null || nomeCompleto.isEmpty()) {
-            throw new RuntimeException("É necessário informar um nome e sobrenome para o PET");
-        }
-
-        if (!nomeCompleto.matches("^[a-zA-Z ]+$")) {
-            throw new RuntimeException("O nome do PET deve conter apenas letras");
-        }
-
-        if (pesoKg < 0.5 || pesoKg > 60) {
-            throw new RuntimeException("O peso deve ser entre 0.5kg e 60kg");
-        }
-
-        if (idadeAnos > 20) {
-            throw new RuntimeException("A idade deve ser entre 20 anos");
-        }
-
-        if (raca == null || raca.isEmpty()) {
-            throw new RuntimeException("É necessário informar uma raça para o PET");
-        }
-
-        if (!raca.matches("^[a-zA-Z ]+$")) {
-            throw new RuntimeException("A raça do PET deve conter apenas letras");
-        }
-
         return new Pet(tipoPet, sexo, nomeCompleto, endereco, idadeAnos, pesoKg, raca, LocalDateTime.now());
     }
 

@@ -61,25 +61,9 @@ public class Main {
 
                     String nomeCompleto = respostas.get(0);
 
-                    String tipoString = respostas.get(1).trim().toUpperCase();
-                    TipoPet tipoPet;
-                    if (tipoString.equals("CACHORRO")) {
-                        tipoPet = TipoPet.CACHORRO;
-                    } else if (tipoString.equals("GATO")) {
-                        tipoPet = TipoPet.GATO;
-                    } else {
-                        throw new RuntimeException("Tipo inválido - Digite Cachorro ou Gato.");
-                    }
+                    TipoPet tipoPet = TipoPet.fromInput(respostas.get(1));
 
-                    String sexoString = respostas.get(2).trim().toUpperCase();
-                    Sexo sexo;
-                    if (sexoString.equals("MASCULINO")) {
-                        sexo = Sexo.MASCULINO;
-                    } else if (sexoString.equals("FEMININO")) {
-                        sexo = Sexo.FEMININO;
-                    } else {
-                        throw new RuntimeException("Sexo inválido - Digite Masculino ou Feminino.");
-                    }
+                    Sexo sexo = Sexo.fromInput(respostas.get(2));
 
                     String[] partesEndereco = respostas.get(3).split(",");
                     if (partesEndereco.length != 4) {
