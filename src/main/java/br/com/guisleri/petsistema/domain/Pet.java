@@ -2,6 +2,8 @@ package br.com.guisleri.petsistema.domain;
 
 import java.time.LocalDateTime;
 
+import static br.com.guisleri.petsistema.domain.Endereco.NAO_INFORMADO;
+
 public class Pet {
 
     private final TipoPet tipoPet;
@@ -39,6 +41,13 @@ public class Pet {
                              double idadeAnos,
                              double pesoKg,
                              String raca) {
+
+        if (tipoPet == null) throw new RuntimeException("Tipo de pet é obrigatório.");
+        if (sexo == null) throw new RuntimeException("Sexo é obrigatório.");
+        if (raca == null || raca.trim().isEmpty()) raca = NAO_INFORMADO;
+        if (endereco == null) throw new RuntimeException("Endereço é obrigatório");
+        if (idadeAnos < 0 || idadeAnos > 20) throw new RuntimeException("Idade deve estar entre 0 a 20 anos.");
+        if (pesoKg < 0.5 || pesoKg > 60.0) throw new RuntimeException("Peso precisa estar entre 0.5kg e 60kg.");
 
         return new Pet(tipoPet, sexo, nomeCompleto, endereco, idadeAnos, pesoKg, raca, LocalDateTime.now());
     }

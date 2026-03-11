@@ -66,10 +66,7 @@ public class Main {
                     Sexo sexo = Sexo.fromInput(respostas.get(2));
 
                     String[] partesEndereco = respostas.get(3).split(",");
-                    if (partesEndereco.length != 4) {
-                        throw new RuntimeException("Endereço inválido. Use: Rua, Número, Bairro, Cidade.");
-                    }
-
+                    if (partesEndereco.length != 4) throw new RuntimeException("Endereço inválido. Use: Rua, Número, Bairro, Cidade.");
                     String rua = partesEndereco[0].trim();
                     String numero = partesEndereco[1].trim();
                     String bairro = partesEndereco[2].trim();

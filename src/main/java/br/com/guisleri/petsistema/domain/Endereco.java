@@ -2,7 +2,7 @@ package br.com.guisleri.petsistema.domain;
 
 public class Endereco {
 
-    private static final String NAO_INFORMADO = "NÃO INFORMADO";
+    static final String NAO_INFORMADO = "NÃO INFORMADO";
 
     private String rua;
     private String numero;
