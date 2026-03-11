@@ -2,30 +2,39 @@ package br.com.guisleri.petsistema.domain;
 
 public class Endereco {
 
+    private static final String NAO_INFORMADO = "NÃO INFORMADO";
+
     private String rua;
     private String numero;
     private String bairro;
     private String cidade;
 
-    private static final String NAO_INFORMADO = "NÃO INFORMADO";
-
     public Endereco(String rua, String numero, String bairro, String cidade) {
+        this.rua = emptyIfBlank(rua);
+        this.numero = naoInformadoIfBlank(numero);
+        this.bairro = emptyIfBlank(bairro);
+        this.cidade = emptyIfBlank(cidade);
+    }
 
-        this.rua = rua.trim();
-
-        if (numero == null) {
-            this.numero = NAO_INFORMADO;
-        } else {
-            this.numero = numero.trim();
+    private static String emptyIfBlank(String s) {
+        if (s == null) {
+            return "";
         }
+        String t =  s.trim();
+        return (t.isEmpty()) ? "" : t;
+    }
 
-        this.bairro = bairro.trim();
-        this.cidade = cidade.trim();
+    private static String naoInformadoIfBlank(String s) {
+        if (s == null) {
+            return NAO_INFORMADO;
+        }
+        String t =  s.trim();
+        return (t.isEmpty()) ? NAO_INFORMADO : t;
     }
 
     @Override
     public String toString() {
-        return "Endereco{" +
+        return "Endereco {" +
                 "rua='" + rua + '\'' +
                 ", numero='" + numero + '\'' +
                 ", bairro='" + bairro + '\'' +

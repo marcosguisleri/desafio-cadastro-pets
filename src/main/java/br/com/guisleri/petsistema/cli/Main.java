@@ -81,15 +81,15 @@ public class Main {
                         throw new RuntimeException("Sexo inválido - Digite Masculino ou Feminino.");
                     }
 
-                    String[] partesEndereço = respostas.get(3).split(",");
-                    if (partesEndereço.length != 4) {
+                    String[] partesEndereco = respostas.get(3).split(",");
+                    if (partesEndereco.length != 4) {
                         throw new RuntimeException("Endereço inválido. Use: Rua, Número, Bairro, Cidade.");
                     }
 
-                    String rua = partesEndereço[0].trim();
-                    String numero = partesEndereço[1].trim();
-                    String bairro = partesEndereço[2].trim();
-                    String cidade = partesEndereço[3].trim();
+                    String rua = partesEndereco[0].trim();
+                    String numero = partesEndereco[1].trim();
+                    String bairro = partesEndereco[2].trim();
+                    String cidade = partesEndereco[3].trim();
                     Endereco endereco = new Endereco(rua, numero, bairro, cidade);
 
                     String idadeString = respostas.get(4).replaceAll(",", ".");
@@ -102,7 +102,7 @@ public class Main {
 
                     Pet pet = Pet.createPet(tipoPet, sexo, nomeCompleto, endereco, idade, pesoKg, raca);
 
-                    IO.println("Pet cadastrado com sucesso!\n");
+                    IO.println("\nPet cadastrado com sucesso!\n");
 
                 } catch (RuntimeException e) {
                     IO.println("Erro no cadastro: " + e.getMessage() + "\n");
