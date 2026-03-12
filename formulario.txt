@@ -2,6 +2,6 @@
 2- Qual o tipo do pet (Cachorro/Gato)?
 3- Qual o sexo do animal (Masculino/Feminino)?
 4 - Endereço onde foi encontrado (Rua, Número, Bairro, Cidade) separados por vírgula
-5 - Qual a idade aproximada do pet? (anos; se for meses, informe 1-11)
+5 - Qual a idade aproximada do pet? (em anos — ex: 0,5 = 6 meses)
 6 - Qual o peso aproximado do pet? (kg; pode usar vírgula ou ponto)
 7 - Qual a raça do pet?

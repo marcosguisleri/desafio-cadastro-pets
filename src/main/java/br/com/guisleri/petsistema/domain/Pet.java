@@ -44,9 +44,25 @@ public class Pet {
 
         if (tipoPet == null) throw new RuntimeException("Tipo de pet é obrigatório.");
         if (sexo == null) throw new RuntimeException("Sexo é obrigatório.");
-        if (raca == null || raca.trim().isEmpty()) raca = NAO_INFORMADO;
         if (endereco == null) throw new RuntimeException("Endereço é obrigatório");
-        if (idadeAnos < 0 || idadeAnos > 20) throw new RuntimeException("Idade deve estar entre 0 a 20 anos.");
+
+
+        if (nomeCompleto == null || nomeCompleto.trim().isEmpty()) throw new RuntimeException("Nome e sobrenome é obrigatório.");
+        nomeCompleto = nomeCompleto.trim();
+        if (!nomeCompleto.matches("^[A-Za-z]+(?: [A-Za-z]+)*$")) throw new RuntimeException("Nome e sobrenome deve conter apenas letras e espaços.");
+        if (nomeCompleto.split("\\s+").length < 2) throw new RuntimeException("Nome completo deve conter pelo menos 2 nomes.");
+
+        if (raca == null || raca.trim().isEmpty()) {
+            raca = NAO_INFORMADO;
+        } else {
+            raca = raca.trim();
+        }
+
+        if (!raca.equals(NAO_INFORMADO)) {
+            if (!raca.matches("^[A-Za-z]+(?: [A-Za-z]+)*$")) throw new RuntimeException("Raça deve conter apenas letras e espaços.");
+        }
+
+        if (idadeAnos < 0 || idadeAnos > 20) throw new RuntimeException("Idade deve estar entre 0 e 20 anos.");
         if (pesoKg < 0.5 || pesoKg > 60.0) throw new RuntimeException("Peso precisa estar entre 0.5kg e 60kg.");
 
         return new Pet(tipoPet, sexo, nomeCompleto, endereco, idadeAnos, pesoKg, raca, LocalDateTime.now());
@@ -74,9 +90,7 @@ public class Pet {
         return sexo;
     }
 
-    public String getNomeCompleto() {
-        return nomeCompleto;
-    }
+    public String getNomeCompleto() { return nomeCompleto; }
 
     public Endereco getEndereco() {
         return endereco;
