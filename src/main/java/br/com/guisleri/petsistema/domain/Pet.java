@@ -82,13 +82,9 @@ public class Pet {
                 '}';
     }
 
-    public TipoPet getTipoPet() {
-        return tipoPet;
-    }
+    public TipoPet getTipoPet() { return tipoPet; }
 
-    public Sexo getSexo() {
-        return sexo;
-    }
+    public Sexo getSexo() { return sexo; }
 
     public String getNomeCompleto() { return nomeCompleto; }
 
