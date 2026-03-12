@@ -5,8 +5,8 @@ import br.com.guisleri.petsistema.domain.Pet;
 import br.com.guisleri.petsistema.domain.Sexo;
 import br.com.guisleri.petsistema.domain.TipoPet;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class Main {
 
         while (true) {
 
-            String caminho = "formulario.txt";
+            String caminhoPerguntas = "formulario.txt";
 
             IO.println("=== SISTEMA DE CADASTRO PET ===");
             IO.println("[1] Cadastrar  [2] Alterar  [3] Deletar");
@@ -43,57 +43,90 @@ public class Main {
             }
 
             if (opcao == 1) {
-
                 List<String> respostas = new ArrayList<>();
 
-                try (BufferedReader br = new BufferedReader(new FileReader(caminho))) {
+                try (BufferedReader br = new BufferedReader(new FileReader(caminhoPerguntas))) {
                     String linha;
                     while ((linha = br.readLine()) != null) {
                         IO.println(linha);
                         respostas.add(IO.readln("R: "));
                     }
-                } catch (Exception e) {
+                } catch (IOException e) {
                     IO.println("Erro ao ler formulario.txt: " + e.getMessage());
                     continue;
                 }
 
                 try {
 
-                    String nomeCompleto = respostas.get(0);
-
+                    String nomeCompleto = respostas.get(0).trim();
                     TipoPet tipoPet = TipoPet.fromInput(respostas.get(1));
-
                     Sexo sexo = Sexo.fromInput(respostas.get(2));
 
-                    String[] partesEndereco = respostas.get(3).split(",");
-                    if (partesEndereco.length != 4) throw new RuntimeException("Endereço inválido. Use: Rua, Número, Bairro, Cidade.");
-                    String rua = partesEndereco[0].trim();
-                    String numero = partesEndereco[1].trim();
-                    String bairro = partesEndereco[2].trim();
-                    String cidade = partesEndereco[3].trim();
-                    Endereco endereco = new Endereco(rua, numero, bairro, cidade);
+                    Endereco endereco = capturarEndereco(respostas);
 
-                    String idadeString = respostas.get(4).replaceAll(",", ".");
-                    double idade = Double.parseDouble(idadeString);
-
-                    String peso = respostas.get(5).replaceAll(",", ".");
-                    double pesoKg = Double.parseDouble(peso);
-
+                    double idade = Double.parseDouble(respostas.get(4).replace(",", "."));
+                    double pesoKg = Double.parseDouble(respostas.get(5).replace(",", "."));
                     String raca = respostas.get(6);
 
                     Pet pet = Pet.createPet(tipoPet, sexo, nomeCompleto, endereco, idade, pesoKg, raca);
 
-                    IO.println("\nPet cadastrado com sucesso!\n");
+                    File dir = new File("petsCadastrados");
+                    dir.mkdirs();
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmm");
+                    String dataHoraFormatada = formatter.format(pet.getDataCadastro());
+
+                    File arquivo = criarArquivoPet(dataHoraFormatada, pet, dir);
+
+                    IO.println("\nPet cadastrado com sucesso!");
+                    IO.println("Arquivo salvo em: " + arquivo.getAbsolutePath() + "\n");
 
                 } catch (RuntimeException e) {
                     IO.println("Erro no cadastro: " + e.getMessage() + "\n");
-                    continue;
+                } catch (IOException e) {
+                    IO.println("Erro ao criar o arquivo: " + e.getMessage() + "\n");
                 }
-
             }
+        }
+    }
 
+    private static Endereco capturarEndereco(List<String> respostas) {
+        String[] partesEndereco = respostas.get(3).split(",");
+        if (partesEndereco.length != 4) {
+            throw new RuntimeException("Endereço inválido. Use: Rua, Número, Bairro, Cidade.");
+        }
+        return new Endereco(
+                partesEndereco[0].trim(),
+                partesEndereco[1].trim(),
+                partesEndereco[2].trim(),
+                partesEndereco[3].trim()
+        );
+    }
+
+    private static File criarArquivoPet(String dataHoraFormatada, Pet pet, File dir) throws IOException {
+
+        String baseNomeArquivo = dataHoraFormatada + "-" +
+                pet.getNomeCompleto().trim().toUpperCase().replaceAll("\\s+", "");
+        String nomeArquivo =  baseNomeArquivo + ".txt";
+        File arquivo = new File(dir, nomeArquivo);
+
+        int cont = 1;
+        while (arquivo.exists()) {
+            nomeArquivo = baseNomeArquivo + "-" + cont + ".txt";
+            arquivo = new File(dir, nomeArquivo);
+            cont++;
         }
 
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivo))) {
+            bw.write("1 - " + pet.getNomeCompleto() + "\n");
+            bw.write("2 - " + pet.getTipoPet() + "\n");
+            bw.write("3 - " + pet.getSexo() + "\n");
+            bw.write("4 - " + pet.getEndereco().getRua() + ", " + pet.getEndereco().getNumero() + ", " + pet.getEndereco().getBairro() + ", " + pet.getEndereco().getCidade() + "\n");
+            bw.write("5 - " + pet.getIdadeAnos() + " ano(s)" + "\n");
+            bw.write("6 - " + pet.getPesoKg() + "kg" + "\n");
+            bw.write("7 - " + pet.getRaca());
+        }
+        return arquivo;
     }
 
 }
