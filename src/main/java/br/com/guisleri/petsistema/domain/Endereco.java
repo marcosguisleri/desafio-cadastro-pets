@@ -32,6 +32,19 @@ public class Endereco {
         return (t.isEmpty()) ? NAO_INFORMADO : t;
     }
 
+    public static Endereco fromInput(String input) {
+        String[] partes = input.split(",");
+        if (partes.length != 4) {
+            throw new RuntimeException("Endereço inválido. Use: Rua, Número, Bairro, Cidade.");
+        }
+        return new Endereco(
+                partes[0].trim(),
+                partes[1].trim(),
+                partes[2].trim(),
+                partes[3].trim()
+        );
+    }
+
     @Override
     public String toString() {
         return "Endereco {" +
