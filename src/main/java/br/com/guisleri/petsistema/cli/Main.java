@@ -9,6 +9,7 @@ import br.com.guisleri.petsistema.repository.PetRepository;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -118,18 +119,43 @@ public class Main {
 
                 TipoPet tipoBuscado = opcaoTipo == 1 ? TipoPet.CACHORRO : TipoPet.GATO;
 
-                IO.println("\nDeseja buscar por algum critério?");
-                IO.println("[1] Nome  [2] Sexo  [3] Idade");
-                IO.println("[4] Peso  [5] Raça  [6] Endereço  [7] Nenhum");
-                int criterio1 = Integer.parseInt(IO.readln("Critério: ").trim());
+                List<Pet> petsFiltrados = pets.stream()
+                        .filter(pet -> pet.getTipoPet() == tipoBuscado)
+                        .toList();
 
-                if (criterio1 < 1 || criterio1 > 7) {
-                    IO.println("Opção inválida: escolha de 1 a 7.\n");
+                if (petsFiltrados.isEmpty()) {
+                    IO.println("Nenhum pet encontrado!");
                     continue;
+                }
+
+                int cont = 1;
+                for (Pet pet : petsFiltrados) {
+                    IO.println(formatarLinhaResultado(cont, pet));
+                    cont++;
                 }
 
             }
         }
+    }
+
+    private static  String formatarLinhaResultado(int id, Pet pet) {
+        String rua = pet.getEndereco().getRua();
+        String numero = pet.getEndereco().getNumero();
+        String cidade = pet.getEndereco().getCidade();
+
+        String enderecoResumo = String.format("%s, %s - %s", rua, numero, cidade);
+
+        return String.format(
+                "%d. %s - %s - %s - %s - %.1f anos - %.1fkg - %s",
+                id,
+                pet.getNomeCompleto(),
+                pet.getTipoPet(),
+                pet.getSexo(),
+                enderecoResumo,
+                pet.getIdadeAnos(),
+                pet.getPesoKg(),
+                pet.getRaca()
+        );
     }
 
 }
