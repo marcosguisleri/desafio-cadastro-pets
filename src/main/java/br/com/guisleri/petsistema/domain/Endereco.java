@@ -70,4 +70,8 @@ public class Endereco {
     public String getCidade() {
         return cidade;
     }
+
+    public String toSearchString() {
+        return rua + " " + numero + " " + bairro + " " + cidade;
+    }
 }
