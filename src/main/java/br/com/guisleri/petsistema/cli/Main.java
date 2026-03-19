@@ -14,127 +14,179 @@ import java.util.function.Predicate;
 
 public class Main {
 
+    private final PetRepository petRepository = new PetRepository();
+
     void main() {
 
-        PetRepository petRepository = new PetRepository();
+        while (true) {
+            int opcao = lerOpcaoMenu();
+
+            switch (opcao) {
+                case 1 -> cadastrarPet();
+                case 2 -> alterarPet();
+                case 3 -> deletarPet();
+                case 4 -> listarPets();
+                case 5 -> buscarPet();
+                case 6 -> {
+                    IO.println("Programa finalizado!");
+                    return;
+                }
+            }
+        }
+
+    }
+
+    private int lerOpcaoMenu() {
+        int opcao = 0;
 
         while (true) {
-
-            String caminhoPerguntas = "formulario.txt";
-
             IO.println("\n=== SISTEMA DE CADASTRO PET ===");
             IO.println("[1] Cadastrar  [2] Alterar  [3] Deletar");
             IO.println("[4] Listar     [5] Buscar   [6] Sair");
             IO.println("-------------------------------");
             String entrada = IO.readln("Digite a opção (1-6): ").trim();
 
-            int opcao;
             try {
                 opcao = Integer.parseInt(entrada);
+                if (opcao >= 1 && opcao <= 6) {
+                    return opcao;
+                } else {
+                    IO.println("Opção inválida: digite apenas números de 1 a 6.\n");
+                }
             } catch (NumberFormatException e) {
                 IO.println("Opção inválida: digite apenas números de 1 a 6.\n");
-                continue;
-            }
-
-            if (opcao < 1 || opcao > 6) {
-                IO.println("Opção inválida: escolha um número entre 1 e 6.\n");
-                continue;
-            }
-
-            if (opcao == 6) {
-                IO.println("Programa finalizado!");
-                return;
-            }
-
-            if (opcao == 1) {
-
-                List<String> respostas = new ArrayList<>();
-
-                try (BufferedReader br = new BufferedReader(new FileReader(caminhoPerguntas))) {
-                    String linha;
-                    while ((linha = br.readLine()) != null) {
-                        IO.println(linha);
-                        respostas.add(IO.readln("R: "));
-                    }
-                } catch (IOException e) {
-                    IO.println("Erro ao ler formulario.txt: " + e.getMessage());
-                    continue;
-                }
-
-                try {
-
-                    String nomeCompleto = respostas.get(0).trim();
-                    TipoPet tipoPet = TipoPet.fromInput(respostas.get(1));
-                    Sexo sexo = Sexo.fromInput(respostas.get(2));
-
-                    Endereco endereco = Endereco.fromInput(respostas.get(3));
-
-                    double idade = Double.parseDouble(respostas.get(4).replace(",", "."));
-                    double pesoKg = Double.parseDouble(respostas.get(5).replace(",", "."));
-                    String raca = respostas.get(6);
-
-                    Pet pet = Pet.createPet(tipoPet, sexo, nomeCompleto, endereco, idade, pesoKg, raca);
-
-                    File arquivo = petRepository.salvarPet(pet);
-
-                    IO.println("\nPet cadastrado com sucesso!");
-                    IO.println("Arquivo salvo em: " + arquivo.getAbsolutePath());
-
-                } catch (RuntimeException e) {
-                    IO.println("Erro no cadastro: " + e.getMessage() + "\n");
-                } catch (IOException e) {
-                    IO.println("Erro ao criar o arquivo: " + e.getMessage() + "\n");
-                }
-
-            } else if (opcao == 5) {
-                buscarPet();
             }
         }
     }
 
-    private void buscarPet() {
-        PetRepository petRepository = new PetRepository();
-        List<Pet> pets;
+    private void cadastrarPet() {
+        String caminhoPerguntas = "formulario.txt";
+        List<String> respostas = new ArrayList<>();
 
-        try {
-            pets = petRepository.carregarPets();
-            if (pets.isEmpty()) {
-                IO.println("Nenhum pet encontrado!");
-                return;
+        try (BufferedReader br = new BufferedReader(new FileReader(caminhoPerguntas))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                IO.println("\n" + linha);
+                respostas.add(IO.readln("R: "));
             }
-        } catch (Exception e) {
-            IO.println("Erro ao carregar pets: " + e.getMessage());
+        } catch (IOException e) {
+            IO.println("\nErro ao ler formulario.txt: " + e.getMessage());
             return;
         }
 
-        TipoPet tipoBuscado = null;
-        while (tipoBuscado == null) {
+        try {
+
+            String nomeCompleto = respostas.get(0).trim();
+            TipoPet tipoPet = TipoPet.fromInput(respostas.get(1));
+            Sexo sexo = Sexo.fromInput(respostas.get(2));
+
+            Endereco endereco = Endereco.fromInput(respostas.get(3));
+
+            double idade = Double.parseDouble(respostas.get(4).replace(",", "."));
+            double pesoKg = Double.parseDouble(respostas.get(5).replace(",", "."));
+            String raca = respostas.get(6);
+
+            Pet pet = Pet.createPet(tipoPet, sexo, nomeCompleto, endereco, idade, pesoKg, raca);
+
+            File arquivo = petRepository.salvarPet(pet);
+
+            IO.println("\nPet cadastrado com sucesso!");
+            IO.println("Arquivo salvo em: " + arquivo.getAbsolutePath());
+
+        } catch (RuntimeException e) {
+            IO.println("Erro no cadastro: " + e.getMessage() + "\n");
+        } catch (IOException e) {
+            IO.println("Erro ao criar o arquivo: " + e.getMessage() + "\n");
+        }
+    }
+
+    private void alterarPet() {
+    }
+
+    private void deletarPet() {
+    }
+
+    private void listarPets() {
+        List<Pet> pets = carregarPetsOuVazio();
+        exibirListaPets(pets);
+    }
+
+    private void buscarPet() {
+        List<Pet> resultado = buscarPetsPorCriterios();
+        exibirListaPets(resultado);
+    }
+
+    private List<Pet> buscarPetsPorCriterios() {
+        List<Pet> pets = carregarPetsOuVazio();
+
+        if (pets.isEmpty()) {
+            return List.of();
+        }
+
+        TipoPet tipoBuscado = lerTipoPetBusca();
+
+        List<Pet> petsFiltradosPorTipo = filtrarPorTipo(pets, tipoBuscado);
+        if (petsFiltradosPorTipo.isEmpty()) {
+            IO.println("Nenhum pet encontrado para esse tipo!");
+            return List.of();
+        }
+
+        int criterio1 = lerCriterioBusca1();
+        Predicate<Pet> filtro = lerFiltro(criterio1);
+
+        int criterio2 = lerCriterioBusca2();
+        if (criterio2 != 7) {
+            filtro = filtro.and(lerFiltro(criterio2));
+        }
+
+        return petsFiltradosPorTipo.stream()
+                .filter(filtro)
+                .toList();
+    }
+
+    private List<Pet> carregarPetsOuVazio() {
+        try {
+            List<Pet> pets = petRepository.carregarPets();
+
+            if (pets.isEmpty()) {
+                IO.println("\nNenhum pet cadastrado ainda!");
+                return List.of();
+            }
+
+            return pets;
+        } catch (Exception e) {
+            IO.println("Erro ao carregar pets: " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    private TipoPet lerTipoPetBusca() {
+        while (true) {
             IO.println("\n=== BUSCAR PET ===");
             IO.println("[1] Cachorro  [2] Gato");
             IO.println("-------------------------------");
 
             try {
                 int opcaoTipo = Integer.parseInt(IO.readln("Tipo do animal: ").trim());
-                if (opcaoTipo == 1)      tipoBuscado = TipoPet.CACHORRO;
-                else if (opcaoTipo == 2) tipoBuscado = TipoPet.GATO;
-                else IO.println("Opção inválida: escolha 1 ou 2.\n");
+
+                if (opcaoTipo == 1) return TipoPet.CACHORRO;
+                if (opcaoTipo == 2) return TipoPet.GATO;
+
+                IO.println("Opção inválida: escolha 1 ou 2.\n");
             } catch (NumberFormatException e) {
                 IO.println("Opção inválida: digite 1 para Cachorro ou 2 para Gato.\n");
             }
         }
+    }
 
-        TipoPet finalTipoBuscado = tipoBuscado;
-        List<Pet> petsFiltrados = pets.stream()
-                .filter(pet -> pet.getTipoPet() == finalTipoBuscado)
+    private List<Pet> filtrarPorTipo(List<Pet> pets, TipoPet tipoBuscado) {
+        return pets.stream()
+                .filter(pet -> pet.getTipoPet() == tipoBuscado)
                 .toList();
+    }
 
-        if (petsFiltrados.isEmpty()) {
-            IO.println("Nenhum pet encontrado para esse tipo!");
-            return;
-        }
-
-        int opcaoCriterio1 = 0;
-        while (opcaoCriterio1 == 0) {
+    private int lerCriterioBusca1() {
+        while (true) {
             IO.println("\n=== BUSCAR PET ===");
             IO.println("Por qual critério deseja buscar?");
             IO.println("[1] Nome ou Sobrenome  [2] Sexo  [3] Idade");
@@ -142,18 +194,21 @@ public class Main {
             IO.println("-------------------------------");
 
             try {
-                int entrada1 = Integer.parseInt(IO.readln("Critério 1: ").trim());
-                if (entrada1 >= 1 && entrada1 <= 6) opcaoCriterio1 = entrada1;
-                else IO.println("Opção inválida: escolha de 1 a 6.\n");
+                int entrada = Integer.parseInt(IO.readln("Critério 1: ").trim());
+
+                if (entrada >= 1 && entrada <= 6) {
+                    return entrada;
+                }
+
+                IO.println("Opção inválida: escolha de 1 a 6.\n");
             } catch (NumberFormatException e) {
                 IO.println("Opção inválida: digite o número correspondente.\n");
             }
         }
+    }
 
-        Predicate<Pet> filtro = lerFiltro(opcaoCriterio1);
-
-        int opcaoCriterio2 = 0;
-        while (opcaoCriterio2 == 0) {
+    private int lerCriterioBusca2() {
+        while (true) {
             IO.println("\n=== BUSCAR PET ===");
             IO.println("Deseja adicionar mais um critério?");
             IO.println("[1] Nome ou Sobrenome  [2] Sexo  [3] Idade");
@@ -161,29 +216,22 @@ public class Main {
             IO.println("-------------------------------");
 
             try {
-                int entrada2 = Integer.parseInt(IO.readln("Critério 2: ").trim());
-                if (entrada2 >= 1 && entrada2 <= 7) opcaoCriterio2 = entrada2;
-                else IO.println("Opção inválida: escolha de 1 a 7.\n");
+                int entrada = Integer.parseInt(IO.readln("Critério 2: ").trim());
+
+                if (entrada >= 1 && entrada <= 7) {
+                    return entrada;
+                }
+
+                IO.println("Opção inválida: escolha de 1 a 7.\n");
             } catch (NumberFormatException e) {
                 IO.println("Opção inválida: digite o número correspondente.\n");
             }
         }
+    }
 
-        if (opcaoCriterio2 != 7) {
-            filtro = filtro.and(lerFiltro(opcaoCriterio2));
-        }
-
-        List<Pet> resultado = petsFiltrados.stream()
-                .filter(filtro)
-                .toList();
-
-        if (resultado.isEmpty()) {
-            IO.println("\nNenhum pet encontrado com os critérios informados.");
-            return;
-        }
-
+    private void exibirListaPets(List<Pet> pets) {
         int cont = 1;
-        for (Pet pet : resultado) {
+        for (Pet pet : pets) {
             IO.println(formatarLinhaResultado(cont, pet));
             cont++;
         }
@@ -200,12 +248,12 @@ public class Main {
                 yield pet -> normalizar(pet.getSexo().toString()).contains(valor);
             }
             case 3 -> {
-                double idade = lerDouble("Idade (anos): "); // ✅ Bug 2 corrigido
-                yield pet -> Double.compare(pet.getIdadeAnos(), idade) == 0; // ✅ Bug 3 corrigido
+                double idade = lerDouble("Idade (anos): ");
+                yield pet -> Double.compare(pet.getIdadeAnos(), idade) == 0;
             }
             case 4 -> {
-                double peso = lerDouble("Peso (kg): "); // ✅ Bug 2 corrigido
-                yield pet -> Double.compare(pet.getPesoKg(), peso) == 0; // ✅ Bug 3 corrigido
+                double peso = lerDouble("Peso (kg): ");
+                yield pet -> Double.compare(pet.getPesoKg(), peso) == 0;
             }
             case 5 -> {
                 String valor = normalizar(IO.readln("Raça: "));
