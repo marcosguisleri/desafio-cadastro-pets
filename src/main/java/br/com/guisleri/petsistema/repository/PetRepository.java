@@ -8,7 +8,9 @@ import br.com.guisleri.petsistema.domain.TipoPet;
 import java.io.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PetRepository {
 
@@ -47,7 +49,7 @@ public class PetRepository {
         return arquivo;
     }
 
-    public List<Pet> carregarPets() throws IOException {
+    private List<File> listarArquivosValidos() {
         File dir = new File(PASTA);
 
         if (!dir.exists() || !dir.isDirectory()) {
@@ -59,25 +61,40 @@ public class PetRepository {
             return new ArrayList<>();
         }
 
+        return Arrays.stream(arquivos)
+                .filter(file -> file.isFile() && file.getName().endsWith(".txt"))
+                .collect(Collectors.toList());
+    }
+
+    public List<Pet> carregarPets() throws Exception {
+        List<File> arquivos = listarArquivosValidos();
         List<Pet> pets = new ArrayList<>();
         for (File arquivo : arquivos) {
-            if (arquivo.isFile()) {
-                pets.add(parserArquivo(arquivo));
-            }
+            pets.add(parserArquivo(arquivo));
         }
         return pets;
+    }
+
+    public List<PetArquivo> carregarPetsComArquivo() throws Exception {
+        List<File> arquivos = listarArquivosValidos();
+        List<PetArquivo> petsComArquivo = new ArrayList<>();
+        for (File arquivo : arquivos) {
+            Pet pet = parserArquivo(arquivo);
+            petsComArquivo.add(new PetArquivo(pet, arquivo));
+        }
+        return petsComArquivo;
     }
 
     private Pet parserArquivo(File arquivo) {
 
         try (BufferedReader br = new BufferedReader(new FileReader(arquivo))) {
             String nomeCompleto = br.readLine().substring(4).trim();
-            TipoPet tipo        = TipoPet.fromInput(br.readLine().substring(4).trim());
-            Sexo sexo           = Sexo.fromInput(br.readLine().substring(4).trim());
-            Endereco endereco   = Endereco.fromInput(br.readLine().substring(4).trim());
-            double idade        = Double.parseDouble(br.readLine().substring(4).trim().replace(" ano(s)", ""));
-            double peso         = Double.parseDouble(br.readLine().substring(4).trim().replace("kg", ""));
-            String raca         = br.readLine().substring(4).trim();
+            TipoPet tipo = TipoPet.fromInput(br.readLine().substring(4).trim());
+            Sexo sexo = Sexo.fromInput(br.readLine().substring(4).trim());
+            Endereco endereco = Endereco.fromInput(br.readLine().substring(4).trim());
+            double idade = Double.parseDouble(br.readLine().substring(4).trim().replace(" ano(s)", ""));
+            double peso = Double.parseDouble(br.readLine().substring(4).trim().replace("kg", ""));
+            String raca = br.readLine().substring(4).trim();
 
             return Pet.createPet(tipo, sexo, nomeCompleto, endereco, idade, peso, raca);
 

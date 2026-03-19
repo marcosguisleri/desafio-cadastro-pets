@@ -4,6 +4,7 @@ import br.com.guisleri.petsistema.domain.Endereco;
 import br.com.guisleri.petsistema.domain.Pet;
 import br.com.guisleri.petsistema.domain.Sexo;
 import br.com.guisleri.petsistema.domain.TipoPet;
+import br.com.guisleri.petsistema.repository.PetArquivo;
 import br.com.guisleri.petsistema.repository.PetRepository;
 
 import java.io.*;
@@ -108,11 +109,21 @@ public class Main {
 
     private void listarPets() {
         List<Pet> pets = carregarPetsOuVazio();
+
+        if (pets.isEmpty()) {
+            return;
+        }
+
         exibirListaPets(pets);
     }
 
     private void buscarPet() {
         List<Pet> resultado = buscarPetsPorCriterios();
+
+        if (resultado.isEmpty()) {
+            return;
+        }
+
         exibirListaPets(resultado);
     }
 
@@ -265,6 +276,69 @@ public class Main {
             }
             default -> pet -> true;
         };
+    }
+
+    private List<PetArquivo> buscarPetsComArquivoPorCriterios() {
+        List<PetArquivo> petsComArquivo = carregarPetsComArquivoOuVazio();
+
+        if (petsComArquivo.isEmpty()) {
+            return List.of();
+        }
+
+        TipoPet tipoBuscado = lerTipoPetBusca();
+
+        List<PetArquivo> petsFiltradosPorTipo = petsComArquivo.stream()
+                .filter(item -> item.getPet().getTipoPet() == tipoBuscado)
+                .toList();
+
+        if (petsFiltradosPorTipo.isEmpty()) {
+            IO.println("Nenhum pet encontrado para esse tipo!");
+            return List.of();
+        }
+
+        int criterio1 = lerCriterioBusca1();
+        Predicate<Pet> filtro = lerFiltro(criterio1);
+
+        int criterio2 = lerCriterioBusca2();
+        if (criterio2 != 7) {
+            filtro = filtro.and(lerFiltro(criterio2));
+        }
+
+        Predicate<Pet> finalFiltro = filtro;
+        List<PetArquivo> resultado = petsFiltradosPorTipo.stream()
+                .filter(item -> finalFiltro.test(item.getPet()))
+                .toList();
+
+        if (resultado.isEmpty()) {
+            IO.println("\nNenhum pet encontrado com os critérios informados.");
+            return List.of();
+        }
+
+        return resultado;
+    }
+
+    private List<PetArquivo> carregarPetsComArquivoOuVazio() {
+        try {
+            List<PetArquivo> petsComArquivo = petRepository.carregarPetsComArquivo();
+
+            if (petsComArquivo.isEmpty()) {
+                IO.println("\nNenhum pet cadastrado ainda!");
+                return List.of();
+            }
+
+            return petsComArquivo;
+        } catch (Exception e) {
+            IO.println("Erro ao carregar pets: " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    private void exibirListaPetsComArquivo(List<PetArquivo> petsComArquivo) {
+        int cont = 1;
+        for (PetArquivo item : petsComArquivo) {
+            IO.println(formatarLinhaResultado(cont, item.getPet()));
+            cont++;
+        }
     }
 
     private double lerDouble(String prompt) {
