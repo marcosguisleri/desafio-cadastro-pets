@@ -49,6 +49,17 @@ public class PetRepository {
         return arquivo;
     }
 
+    public void deletarPet(File arquivo) {
+        if (!arquivo.delete()) {
+            throw new RuntimeException("Não foi possível deletar o arquivo: " + arquivo.getName());
+        }
+    }
+
+    public File atualizarPet(PetArquivo petArquivo, Pet petAtualizado) throws IOException {
+        deletarPet(petArquivo.getArquivo());
+        return salvarPet(petAtualizado);
+    }
+
     private List<File> listarArquivosValidos() {
         File dir = new File(PASTA);
 

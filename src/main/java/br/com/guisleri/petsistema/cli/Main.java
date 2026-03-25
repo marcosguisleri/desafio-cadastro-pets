@@ -52,10 +52,10 @@ public class Main {
                 if (opcao >= 1 && opcao <= 6) {
                     return opcao;
                 } else {
-                    IO.println("Opção inválida: digite apenas números de 1 a 6.\n");
+                    IO.println("Opção inválida: digite apenas números de 1 a 6.");
                 }
             } catch (NumberFormatException e) {
-                IO.println("Opção inválida: digite apenas números de 1 a 6.\n");
+                IO.println("Opção inválida: digite apenas números de 1 a 6.");
             }
         }
     }
@@ -102,9 +102,103 @@ public class Main {
     }
 
     private void alterarPet() {
+        List<PetArquivo> resultado = buscarPetsComArquivoPorCriterios();
+        if (resultado.isEmpty()) return;
+
+        exibirListaPetsComArquivo(resultado);
+        int escolha = lerEscolhaDaLista(resultado.size());
+        PetArquivo petArquivo = resultado.get(escolha - 1);
+        Pet pet = petArquivo.getPet();
+
+        IO.println("\n=== ALTERAR PET: " + pet.getNomeCompleto() + " ===");
+        IO.println("(Deixe em branco para manter o valor atual)\n");
+
+        String novoNome = IO.readln("Nome completo [" + pet.getNomeCompleto() + "]: ").trim();
+        if (!novoNome.isEmpty()) {
+            if (!novoNome.matches("^[A-Za-zÀ-ú]+(?: [A-Za-zÀ-ú]+)*$") || novoNome.split("\\s+").length < 2) {
+                IO.println("Nome inválido (somente letras, mínimo 2 nomes). Mantendo o valor atual.");
+            } else {
+                pet.setNomeCompleto(novoNome);
+            }
+        }
+
+        Endereco endAtual = pet.getEndereco();
+        String endAtualFormatado = endAtual.getRua() + ", " + endAtual.getNumero() + ", "
+                + endAtual.getBairro() + ", " + endAtual.getCidade();
+        String novoEndereco = IO.readln("Endereço [" + endAtualFormatado + "]: ").trim();
+        if (!novoEndereco.isEmpty()) {
+            try {
+                pet.setEndereco(Endereco.fromInput(novoEndereco));
+            } catch (RuntimeException e) {
+                IO.println("Endereço inválido (use: Rua, Número, Bairro, Cidade). Mantendo o valor atual.");
+            }
+        }
+
+        String novaIdade = IO.readln("Idade em anos [" + pet.getIdadeAnos() + "]: ").trim();
+        if (!novaIdade.isEmpty()) {
+            try {
+                double idade = Double.parseDouble(novaIdade.replace(",", "."));
+                if (idade < 0 || idade > 20) {
+                    IO.println("Idade inválida (0 a 20 anos). Mantendo o valor atual.");
+                } else {
+                    pet.setIdadeAnos(idade);
+                }
+            } catch (NumberFormatException e) {
+                IO.println("Valor inválido. Mantendo o valor atual.");
+            }
+        }
+
+        String novoPeso = IO.readln("Peso em kg [" + pet.getPesoKg() + "]: ").trim();
+        if (!novoPeso.isEmpty()) {
+            try {
+                double peso = Double.parseDouble(novoPeso.replace(",", "."));
+                if (peso < 0.5 || peso > 60) {
+                    IO.println("Peso inválido (0.5kg a 60kg). Mantendo o valor atual.");
+                } else {
+                    pet.setPesoKg(peso);
+                }
+            } catch (NumberFormatException e) {
+                IO.println("Valor inválido. Mantendo o valor atual.");
+            }
+        }
+
+        String novaRaca = IO.readln("Raça [" + pet.getRaca() + "]: ").trim();
+        if (!novaRaca.isEmpty()) {
+            if (!novaRaca.matches("^[A-Za-zÀ-ú]+(?: [A-Za-zÀ-ú]+)*$")) {
+                IO.println("Raça inválida (somente letras). Mantendo o valor atual.");
+            } else {
+                pet.setRaca(novaRaca);
+            }
+        }
+
+        try {
+            File novoArquivo = petRepository.atualizarPet(petArquivo, pet);
+            IO.println("\nPet atualizado com sucesso!");
+            IO.println("Arquivo salvo em: " + novoArquivo.getAbsolutePath());
+        } catch (IOException e) {
+            IO.println("Erro ao salvar alterações: " + e.getMessage());
+        }
+
     }
 
     private void deletarPet() {
+        List<PetArquivo> resultado = buscarPetsComArquivoPorCriterios();
+        if (resultado.isEmpty()) return;
+
+        exibirListaPetsComArquivo(resultado);
+        int escolha = lerEscolhaDaLista(resultado.size());
+        PetArquivo petArquivo = resultado.get(escolha - 1);
+
+        IO.println("\nVocê está prestes a deletar: \"" + petArquivo.getPet().getNomeCompleto() + "\"");
+        String confirmacao = IO.readln("Tem certeza? Digite SIM para confirmar: ").trim();
+
+        if (confirmacao.equalsIgnoreCase("SIM")) {
+            petRepository.deletarPet(petArquivo.getArquivo());
+            IO.println("\nPet deletado com sucesso!");
+        } else {
+            IO.println("\nOperação cancelada. Nenhum pet foi deletado.");
+        }
+
     }
 
     private void listarPets() {
@@ -150,9 +244,16 @@ public class Main {
             filtro = filtro.and(lerFiltro(criterio2));
         }
 
-        return petsFiltradosPorTipo.stream()
+        List<Pet> resultado = petsFiltradosPorTipo.stream()
                 .filter(filtro)
                 .toList();
+
+        if (resultado.isEmpty()) {
+            IO.println("\nNenhum pet encontrado com os critérios informados.");
+            return List.of();
+        }
+
+        return resultado;
     }
 
     private List<Pet> carregarPetsOuVazio() {
@@ -315,6 +416,7 @@ public class Main {
         }
 
         return resultado;
+
     }
 
     private List<PetArquivo> carregarPetsComArquivoOuVazio() {
@@ -338,6 +440,20 @@ public class Main {
         for (PetArquivo item : petsComArquivo) {
             IO.println(formatarLinhaResultado(cont, item.getPet()));
             cont++;
+        }
+    }
+
+    private int lerEscolhaDaLista(int total) {
+        while (true) {
+            try {
+                int escolha = Integer.parseInt(IO.readln("\nDigite o número do pet desejado: ").trim());
+                if (escolha >= 1 && escolha <= total) {
+                    return escolha;
+                }
+                IO.println("Número inválido: escolha entre 1 e " + total + ".");
+            } catch (NumberFormatException e) {
+                IO.println("Entrada inválida: digite apenas números.");
+            }
         }
     }
 

@@ -107,4 +107,14 @@ public class Pet {
     public LocalDateTime getDataCadastro() {
         return dataCadastro;
     }
+
+    public void setNomeCompleto(String nomeCompleto) { this.nomeCompleto = nomeCompleto; }
+
+    public void setEndereco(Endereco endereco) { this.endereco = endereco; }
+
+    public void setIdadeAnos(double idadeAnos) { this.idadeAnos = idadeAnos; }
+
+    public void setPesoKg(double pesoKg) { this.pesoKg = pesoKg; }
+
+    public void setRaca(String raca) { this.raca = raca; }
 }
