@@ -7,3 +7,4 @@
 7 - Qual a raça do pet?
 8 - Qual a cor do Pet?
 9 - Qual a cor da pelagem do Pet?
+10 - Nivel de Fofura

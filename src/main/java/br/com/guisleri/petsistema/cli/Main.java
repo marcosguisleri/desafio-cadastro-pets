@@ -297,7 +297,18 @@ public class Main {
             double pesoKg = Double.parseDouble(respostas.get(5).replace(",", "."));
             String raca = respostas.get(6);
 
-            Pet pet = Pet.createPet(tipoPet, sexo, nomeCompleto, endereco, idade, pesoKg, raca);
+            List<String> respostasExtra = new ArrayList<>();
+            if (respostas.size() > 7) {
+                for (int i = 7; i < respostas.size(); i++) {
+                    String resposta = respostas.get(i).trim();
+                    if (resposta.isEmpty()) {
+                        resposta = Endereco.NAO_INFORMADO;
+                    }
+                    respostasExtra.add(resposta);
+                }
+            }
+
+            Pet pet = Pet.createPet(tipoPet, sexo, nomeCompleto, endereco, idade, pesoKg, raca, respostasExtra);
 
             File arquivo = petRepository.salvarPet(pet);
 

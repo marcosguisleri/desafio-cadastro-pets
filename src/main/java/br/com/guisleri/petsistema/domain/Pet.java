@@ -1,6 +1,7 @@
 package br.com.guisleri.petsistema.domain;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static br.com.guisleri.petsistema.domain.Endereco.NAO_INFORMADO;
 
@@ -13,6 +14,7 @@ public class Pet {
     private double idadeAnos;
     private double pesoKg;
     private String raca;
+    private List<String> respostasExtra;
     private final LocalDateTime dataCadastro;
 
     private Pet(TipoPet tipoPet,
@@ -22,6 +24,7 @@ public class Pet {
                 double idadeAnos,
                 double pesoKg,
                 String raca,
+                List<String> respostasExtra,
                 LocalDateTime dataCadastro) {
 
         this.tipoPet = tipoPet;
@@ -31,6 +34,7 @@ public class Pet {
         this.idadeAnos = idadeAnos;
         this.pesoKg = pesoKg;
         this.raca = raca;
+        this.respostasExtra = respostasExtra;
         this.dataCadastro = dataCadastro;
     }
 
@@ -40,7 +44,8 @@ public class Pet {
                              Endereco endereco,
                              double idadeAnos,
                              double pesoKg,
-                             String raca) {
+                             String raca,
+                                List<String> respostasExtra) {
 
         if (tipoPet == null) throw new RuntimeException("Tipo de pet é obrigatório.");
         if (sexo == null) throw new RuntimeException("Sexo é obrigatório.");
@@ -65,7 +70,7 @@ public class Pet {
         if (idadeAnos < 0 || idadeAnos > 20) throw new RuntimeException("Idade deve estar entre 0 e 20 anos.");
         if (pesoKg < 0.5 || pesoKg > 60.0) throw new RuntimeException("Peso precisa estar entre 0.5kg e 60kg.");
 
-        return new Pet(tipoPet, sexo, nomeCompleto, endereco, idadeAnos, pesoKg, raca, LocalDateTime.now());
+        return new Pet(tipoPet, sexo, nomeCompleto, endereco, idadeAnos, pesoKg, raca, respostasExtra, LocalDateTime.now());
     }
 
     @Override
@@ -103,6 +108,8 @@ public class Pet {
     public String getRaca() {
         return raca;
     }
+
+    public List<String> getRespostasExtra() { return respostasExtra; }
 
     public LocalDateTime getDataCadastro() {
         return dataCadastro;

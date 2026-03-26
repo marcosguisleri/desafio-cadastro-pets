@@ -36,6 +36,24 @@ public class PetRepository {
             cont++;
         }
 
+        String caminhoFormulario = "formulario.txt";
+        List<String> perguntasOriginais = new ArrayList<>();
+        List<String> perguntasAdicionadas = new ArrayList<>();
+        int cont1 = 1;
+        try (BufferedReader br = new BufferedReader(new FileReader(caminhoFormulario))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                if (cont1 <= 7) {
+                    perguntasOriginais.add(linha);
+                } else {
+                    perguntasAdicionadas.add(linha);
+                }
+                cont1++;
+            }
+        } catch (IOException e) {
+            IO.println("Erro ao ler o arquivo: " + e.getMessage());
+        }
+
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivo))) {
             bw.write("1 - " + pet.getNomeCompleto() + "\n");
             bw.write("2 - " + pet.getTipoPet() + "\n");
@@ -44,6 +62,15 @@ public class PetRepository {
             bw.write("5 - " + pet.getIdadeAnos() + " ano(s)" + "\n");
             bw.write("6 - " + pet.getPesoKg() + "kg" + "\n");
             bw.write("7 - " + pet.getRaca());
+
+            List<String> extras = pet.getRespostasExtra();
+
+            for (int i = 0; i < extras.size(); i++) {
+                int numero = 7 + i + 1;
+                String textoPergunta = perguntasAdicionadas.get(i).split(" - ")[1];
+                String resposta = extras.get(i);
+                bw.write("\n" + numero + " - [EXTRA - " + textoPergunta + "] - " + resposta);
+            }
         }
 
         return arquivo;
@@ -107,7 +134,7 @@ public class PetRepository {
             double peso = Double.parseDouble(br.readLine().substring(4).trim().replace("kg", ""));
             String raca = br.readLine().substring(4).trim();
 
-            return Pet.createPet(tipo, sexo, nomeCompleto, endereco, idade, peso, raca);
+            return Pet.createPet(tipo, sexo, nomeCompleto, endereco, idade, peso, raca, new ArrayList<>());
 
         } catch (Exception e) {
             throw new RuntimeException("Erro ao ler arquivo: " + arquivo.getName());
