@@ -26,51 +26,53 @@ public class Pet {
                 String raca,
                 List<String> respostasExtra,
                 LocalDateTime dataCadastro) {
-
-        this.tipoPet = tipoPet;
-        this.sexo = sexo;
-        this.nomeCompleto = nomeCompleto;
-        this.endereco = endereco;
-        this.idadeAnos = idadeAnos;
-        this.pesoKg = pesoKg;
-        this.raca = raca;
+        this.tipoPet        = tipoPet;
+        this.sexo           = sexo;
+        this.nomeCompleto   = nomeCompleto;
+        this.endereco       = endereco;
+        this.idadeAnos      = idadeAnos;
+        this.pesoKg         = pesoKg;
+        this.raca           = raca;
         this.respostasExtra = respostasExtra;
-        this.dataCadastro = dataCadastro;
+        this.dataCadastro   = dataCadastro;
     }
 
     public static Pet createPet(TipoPet tipoPet,
-                             Sexo sexo,
-                             String nomeCompleto,
-                             Endereco endereco,
-                             double idadeAnos,
-                             double pesoKg,
-                             String raca,
+                                Sexo sexo,
+                                String nomeCompleto,
+                                Endereco endereco,
+                                double idadeAnos,
+                                double pesoKg,
+                                String raca,
                                 List<String> respostasExtra) {
 
-        if (tipoPet == null) throw new RuntimeException("Tipo de pet é obrigatório.");
-        if (sexo == null) throw new RuntimeException("Sexo é obrigatório.");
-        if (endereco == null) throw new RuntimeException("Endereço é obrigatório");
+        if (tipoPet == null)  throw new RuntimeException("Tipo de pet é obrigatório.");
+        if (sexo == null)     throw new RuntimeException("Sexo é obrigatório.");
+        if (endereco == null) throw new RuntimeException("Endereço é obrigatório.");
 
+        if (nomeCompleto == null || nomeCompleto.trim().isEmpty())
+            throw new RuntimeException("Nome e sobrenome são obrigatórios.");
 
-        if (nomeCompleto == null || nomeCompleto.trim().isEmpty()) throw new RuntimeException("Nome e sobrenome é obrigatório.");
         nomeCompleto = nomeCompleto.trim();
-        if (!nomeCompleto.matches("^[A-Za-z]+(?: [A-Za-z]+)*$")) throw new RuntimeException("Nome e sobrenome deve conter apenas letras e espaços.");
-        if (nomeCompleto.split("\\s+").length < 2) throw new RuntimeException("Nome completo deve conter pelo menos 2 nomes.");
 
-        if (raca == null || raca.trim().isEmpty()) {
-            raca = NAO_INFORMADO;
-        } else {
-            raca = raca.trim();
-        }
+        if (!nomeCompleto.matches("^[A-Za-z]+(?: [A-Za-z]+)*$"))
+            throw new RuntimeException("Nome deve conter apenas letras e espaços.");
+        if (nomeCompleto.split("\\s+").length < 2)
+            throw new RuntimeException("Informe nome e sobrenome.");
 
-        if (!raca.equals(NAO_INFORMADO)) {
-            if (!raca.matches("^[A-Za-z]+(?: [A-Za-z]+)*$")) throw new RuntimeException("Raça deve conter apenas letras e espaços.");
-        }
+        raca = (raca == null || raca.trim().isEmpty()) ? NAO_INFORMADO : raca.trim();
 
-        if (idadeAnos < 0 || idadeAnos > 20) throw new RuntimeException("Idade deve estar entre 0 e 20 anos.");
-        if (pesoKg < 0.5 || pesoKg > 60.0) throw new RuntimeException("Peso precisa estar entre 0.5kg e 60kg.");
+        if (!raca.equals(NAO_INFORMADO) && !raca.matches("^[A-Za-z]+(?: [A-Za-z]+)*$"))
+            throw new RuntimeException("Raça deve conter apenas letras e espaços.");
 
-        return new Pet(tipoPet, sexo, nomeCompleto, endereco, idadeAnos, pesoKg, raca, respostasExtra, LocalDateTime.now());
+        if (idadeAnos < 0 || idadeAnos > 20)
+            throw new RuntimeException("Idade deve estar entre 0 e 20 anos.");
+        if (pesoKg < 0.5 || pesoKg > 60.0)
+            throw new RuntimeException("Peso deve estar entre 0,5 kg e 60 kg.");
+
+        return new Pet(tipoPet, sexo, nomeCompleto, endereco, idadeAnos, pesoKg, raca,
+                respostasExtra == null ? List.of() : respostasExtra,
+                LocalDateTime.now());
     }
 
     @Override
@@ -79,7 +81,7 @@ public class Pet {
                 "tipoPet=" + tipoPet +
                 ", sexo=" + sexo +
                 ", nomeCompleto='" + nomeCompleto + '\'' +
-                ", endereco=" + endereco.toString() +
+                ", endereco=" + endereco +
                 ", idadeAnos=" + idadeAnos +
                 ", pesoKg=" + pesoKg +
                 ", raca='" + raca + '\'' +
@@ -87,41 +89,21 @@ public class Pet {
                 '}';
     }
 
-    public TipoPet getTipoPet() { return tipoPet; }
+    // Getters
+    public TipoPet getTipoPet()              { return tipoPet; }
+    public Sexo getSexo()                    { return sexo; }
+    public String getNomeCompleto()          { return nomeCompleto; }
+    public Endereco getEndereco()            { return endereco; }
+    public double getIdadeAnos()             { return idadeAnos; }
+    public double getPesoKg()                { return pesoKg; }
+    public String getRaca()                  { return raca; }
+    public List<String> getRespostasExtra()  { return respostasExtra; }
+    public LocalDateTime getDataCadastro()   { return dataCadastro; }
 
-    public Sexo getSexo() { return sexo; }
-
-    public String getNomeCompleto() { return nomeCompleto; }
-
-    public Endereco getEndereco() {
-        return endereco;
-    }
-
-    public double getIdadeAnos() {
-        return idadeAnos;
-    }
-
-    public double getPesoKg() {
-        return pesoKg;
-    }
-
-    public String getRaca() {
-        return raca;
-    }
-
-    public List<String> getRespostasExtra() { return respostasExtra; }
-
-    public LocalDateTime getDataCadastro() {
-        return dataCadastro;
-    }
-
+    // Setters (Tipo e Sexo não são alteráveis)
     public void setNomeCompleto(String nomeCompleto) { this.nomeCompleto = nomeCompleto; }
-
-    public void setEndereco(Endereco endereco) { this.endereco = endereco; }
-
-    public void setIdadeAnos(double idadeAnos) { this.idadeAnos = idadeAnos; }
-
-    public void setPesoKg(double pesoKg) { this.pesoKg = pesoKg; }
-
-    public void setRaca(String raca) { this.raca = raca; }
+    public void setEndereco(Endereco endereco)        { this.endereco = endereco; }
+    public void setIdadeAnos(double idadeAnos)        { this.idadeAnos = idadeAnos; }
+    public void setPesoKg(double pesoKg)              { this.pesoKg = pesoKg; }
+    public void setRaca(String raca)                  { this.raca = raca; }
 }
