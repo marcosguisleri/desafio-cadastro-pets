@@ -20,30 +20,217 @@ public class Main {
     void main() {
 
         while (true) {
-            int opcao = lerOpcaoMenu();
 
-            switch (opcao) {
-                case 1 -> cadastrarPet();
-                case 2 -> alterarPet();
-                case 3 -> deletarPet();
-                case 4 -> listarPets();
-                case 5 -> buscarPet();
-                case 6 -> {
-                    IO.println("Programa finalizado!");
-                    return;
+            int opcaoInicial = lerOpcaoMenuInicial();
+
+            if (opcaoInicial == 1) {
+                while (true) {
+                    int opcao = lerOpcaoMenuCadastro();
+                    if (opcao == 1) {
+                        cadastrarPet();
+                    } else if (opcao == 2) {
+                        alterarPet();
+                    } else if (opcao == 3) {
+                        deletarPet();
+                    } else if (opcao == 4) {
+                        listarPets();
+                    } else if (opcao == 5) {
+                        buscarPet();
+                    } else if (opcao == 6) {
+                        IO.println("Voltando para o menu inicial!");
+                        break;
+                    }
                 }
+            } else if (opcaoInicial == 2) {
+                while (true) {
+                    int opcao = lerOpcaoMenuFormulario();
+                    if (opcao == 1) {
+                        criarPergunta();
+                    } else if (opcao == 2) {
+                        alterarPergunta();
+                    } else if (opcao == 3) {
+                        deletarPergunta();
+                    } else if (opcao == 4) {
+                        break;
+                    }
+                }
+            } else if (opcaoInicial == 3) {
+                IO.println("Encerrando...");
+                break;
             }
         }
 
     }
 
-    private int lerOpcaoMenu() {
+    private void criarPergunta() {
+
+        String caminhoFormulario = "formulario.txt";
+
+        int totalLinhas = 0;
+        try (BufferedReader br = new BufferedReader(new FileReader(caminhoFormulario))) {
+            while (br.readLine() != null) {
+                totalLinhas++;
+            }
+        } catch (IOException e) {
+            IO.println("Erro ao ler o arquivo: " + e.getMessage());
+            return;
+        }
+
+        int proximoNumero = totalLinhas + 1;
+        String pergunta = IO.readln("Digite a nova pergunta: ");
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(caminhoFormulario, true))) {
+            bw.newLine();
+            bw.write(proximoNumero + " - " + pergunta);
+            IO.println("\nPergunta " + proximoNumero + " adicionada com sucesso!");
+        } catch (IOException e) {
+            IO.println("Erro ao adicionar pergunta: " + e.getMessage());
+        }
+
+    }
+
+    private void alterarPergunta() {
+
+        String caminhoFormulario = "formulario.txt";
+        List<String> perguntasOriginais = new ArrayList<>();
+        List<String> perguntasAdicionadas = new ArrayList<>();
+        int cont = 1;
+        try (BufferedReader br = new BufferedReader(new FileReader(caminhoFormulario))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                if (cont <= 7) {
+                    perguntasOriginais.add(linha);
+                } else {
+                    perguntasAdicionadas.add(linha);
+                }
+                cont++;
+            }
+        } catch (IOException e) {
+            IO.println("Erro ao ler o arquivo: " + e.getMessage());
+            return;
+        }
+
+        if (perguntasAdicionadas.isEmpty()) {
+            IO.println("\nNenhuma pergunta extra cadastrada ainda!");
+            return;
+        }
+        exibirListaPerguntas(perguntasAdicionadas);
+        int escolha = lerEscolhaDaListaPerguntas(perguntasAdicionadas.size());
+
+        IO.println("\nVocê está prestes a alterar: \"" + perguntasAdicionadas.get(escolha - 1).split(" - ")[1]  + "\"");
+        String novaPergunta = IO.readln("Digite a nova pergunta: ").trim();
+
+        perguntasAdicionadas.set(escolha - 1, novaPergunta);
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(caminhoFormulario))) {
+            for (int i = 0; i < perguntasOriginais.size(); i++) {
+                bw.write(perguntasOriginais.get(i));
+                bw.newLine();
+            }
+
+            for (int i = 0; i < perguntasAdicionadas.size(); i++) {
+                int novoNumero = 7 + i + 1;
+                bw.write(novoNumero + " - " + perguntasAdicionadas.get(i));
+                if (i < perguntasAdicionadas.size() - 1) {
+                    bw.newLine();
+                }
+            }
+
+            IO.println("\nPergunta alterada com sucesso!");
+        } catch (IOException e) {
+            IO.println("Erro ao alterar pergunta: " + e.getMessage());
+        }
+
+    }
+
+    private void deletarPergunta() {
+
+        String caminhoFormulario = "formulario.txt";
+        List<String> perguntasOriginais = new ArrayList<>();
+        List<String> perguntasAdicionadas = new ArrayList<>();
+        int cont = 1;
+        try (BufferedReader br = new BufferedReader(new FileReader(caminhoFormulario))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                if (cont <= 7) {
+                    perguntasOriginais.add(linha);
+                } else {
+                    perguntasAdicionadas.add(linha);
+                }
+                cont++;
+            }
+        } catch (IOException e) {
+            IO.println("Erro ao ler o arquivo: " + e.getMessage());
+            return;
+        }
+
+        if (perguntasAdicionadas.isEmpty()) {
+            IO.println("\nNenhuma pergunta extra cadastrada ainda!");
+            return;
+        }
+        exibirListaPerguntas(perguntasAdicionadas);
+        int escolha = lerEscolhaDaListaPerguntas(perguntasAdicionadas.size());
+
+        IO.println("\nVocê está prestes a deletar: \"" + perguntasAdicionadas.get(escolha - 1)  + "\"");
+        String confirmacao = IO.readln("Tem certeza? Digite SIM para confirmar: ").trim();
+
+        if (confirmacao.equalsIgnoreCase("SIM")) {
+            IO.println("\nPergunta deletada com sucesso!");
+            perguntasAdicionadas.remove(escolha - 1);
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(caminhoFormulario))) {
+                for (int i = 0; i < perguntasOriginais.size(); i++) {
+                    bw.write(perguntasOriginais.get(i));
+                    bw.newLine();
+                }
+
+                for (int i = 0; i < perguntasAdicionadas.size(); i++) {
+                    int novoNumero = 7 + i + 1;
+                    bw.write(novoNumero + " - " + perguntasAdicionadas.get(i).split(" - ")[1]);
+                    if (i < perguntasAdicionadas.size() - 1) {
+                        bw.newLine();
+                    }
+                }
+            } catch (IOException e) {
+                IO.println("Erro ao deletar pergunta: " + e.getMessage());
+            }
+        } else {
+            IO.println("\nOperação cancelada. Nenhuma pergunta foi deletada.");
+        }
+
+    }
+
+    private int lerOpcaoMenuInicial() {
+        int opcao = 0;
+
+        while (true) {
+            IO.println("\n=== ACOLHE PET ===");
+            IO.println("[1] Iniciar o sistema para cadastro de PETS");
+            IO.println("[2] Iniciar o sistema para alterar formulário");
+            IO.println("[3] Encerrar o sistema");
+            IO.println("-------------------------------");
+            String entrada = IO.readln("Digite a opção (1-3): ").trim();
+
+            try {
+                opcao = Integer.parseInt(entrada);
+                if (opcao >= 1 && opcao <= 3) {
+                    return opcao;
+                } else {
+                    IO.println("Opção inválida: digite apenas números de 1 a 3.");
+                }
+            } catch (NumberFormatException e) {
+                IO.println("Opção inválida: digite apenas números de 1 a 3.");
+            }
+        }
+
+    }
+
+    private int lerOpcaoMenuCadastro() {
         int opcao = 0;
 
         while (true) {
             IO.println("\n=== SISTEMA DE CADASTRO PET ===");
             IO.println("[1] Cadastrar  [2] Alterar  [3] Deletar");
-            IO.println("[4] Listar     [5] Buscar   [6] Sair");
+            IO.println("[4] Listar     [5] Buscar   [6] Voltar para o menu inicial");
             IO.println("-------------------------------");
             String entrada = IO.readln("Digite a opção (1-6): ").trim();
 
@@ -56,6 +243,29 @@ public class Main {
                 }
             } catch (NumberFormatException e) {
                 IO.println("Opção inválida: digite apenas números de 1 a 6.");
+            }
+        }
+    }
+
+    private int lerOpcaoMenuFormulario() {
+        int opcao = 0;
+
+        while (true) {
+            IO.println("\n=== ALTERAR FORMULÁRIO ===");
+            IO.println("[1] Criar nova pergunta  [2] Alterar pergunta existente");
+            IO.println("[3] Excluir pergunta existente  [4] Voltar para o menu inicial");
+            IO.println("-------------------------------");
+            String entrada = IO.readln("Digite a opção (1-4): ").trim();
+
+            try {
+                opcao = Integer.parseInt(entrada);
+                if (opcao >= 1 && opcao <= 4) {
+                    return opcao;
+                } else {
+                    IO.println("Opção inválida: digite apenas números de 1 a 4.");
+                }
+            } catch (NumberFormatException e) {
+                IO.println("Opção inválida: digite apenas números de 1 a 4.");
             }
         }
     }
@@ -106,7 +316,7 @@ public class Main {
         if (resultado.isEmpty()) return;
 
         exibirListaPetsComArquivo(resultado);
-        int escolha = lerEscolhaDaLista(resultado.size());
+        int escolha = lerEscolhaDaListaPet(resultado.size());
         PetArquivo petArquivo = resultado.get(escolha - 1);
         Pet pet = petArquivo.getPet();
 
@@ -186,7 +396,7 @@ public class Main {
         if (resultado.isEmpty()) return;
 
         exibirListaPetsComArquivo(resultado);
-        int escolha = lerEscolhaDaLista(resultado.size());
+        int escolha = lerEscolhaDaListaPet(resultado.size());
         PetArquivo petArquivo = resultado.get(escolha - 1);
 
         IO.println("\nVocê está prestes a deletar: \"" + petArquivo.getPet().getNomeCompleto() + "\"");
@@ -344,7 +554,15 @@ public class Main {
     private void exibirListaPets(List<Pet> pets) {
         int cont = 1;
         for (Pet pet : pets) {
-            IO.println(formatarLinhaResultado(cont, pet));
+            IO.println(formatarLinhaResultadoPet(cont, pet));
+            cont++;
+        }
+    }
+
+    private void exibirListaPerguntas(List<String> perguntas) {
+        int cont = 1;
+        for (String pergunta : perguntas) {
+            IO.println(formatarLinhaResultadoPergunta(cont, pergunta));
             cont++;
         }
     }
@@ -438,15 +656,29 @@ public class Main {
     private void exibirListaPetsComArquivo(List<PetArquivo> petsComArquivo) {
         int cont = 1;
         for (PetArquivo item : petsComArquivo) {
-            IO.println(formatarLinhaResultado(cont, item.getPet()));
+            IO.println(formatarLinhaResultadoPet(cont, item.getPet()));
             cont++;
         }
     }
 
-    private int lerEscolhaDaLista(int total) {
+    private int lerEscolhaDaListaPet(int total) {
         while (true) {
             try {
                 int escolha = Integer.parseInt(IO.readln("\nDigite o número do pet desejado: ").trim());
+                if (escolha >= 1 && escolha <= total) {
+                    return escolha;
+                }
+                IO.println("Número inválido: escolha entre 1 e " + total + ".");
+            } catch (NumberFormatException e) {
+                IO.println("Entrada inválida: digite apenas números.");
+            }
+        }
+    }
+
+    private int lerEscolhaDaListaPerguntas(int total) {
+        while (true) {
+            try {
+                int escolha = Integer.parseInt(IO.readln("\nDigite o número da pergunta que deseja selecionar: ").trim());
                 if (escolha >= 1 && escolha <= total) {
                     return escolha;
                 }
@@ -467,7 +699,7 @@ public class Main {
         }
     }
 
-    private static String formatarLinhaResultado(int id, Pet pet) {
+    private static String formatarLinhaResultadoPet(int id, Pet pet) {
         String rua = pet.getEndereco().getRua();
         String numero = pet.getEndereco().getNumero();
         String bairro = pet.getEndereco().getBairro();
@@ -486,6 +718,10 @@ public class Main {
                 pet.getPesoKg(),
                 pet.getRaca()
         );
+    }
+
+    private static String formatarLinhaResultadoPergunta(int cont, String pergunta) {
+        return String.format("\n%d | Pergunta %s", cont, pergunta);
     }
 
     private static String normalizar(String texto) {

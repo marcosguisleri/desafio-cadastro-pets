@@ -5,3 +5,5 @@
 5 - Qual a idade aproximada do pet? (em anos — ex: 0,5 = 6 meses)
 6 - Qual o peso aproximado do pet? (kg; pode usar vírgula ou ponto)
 7 - Qual a raça do pet?
+8 - Qual a cor do Pet?
+9 - Qual a cor da pelagem do Pet?
